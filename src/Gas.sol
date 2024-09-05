@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.0;
-
+pragma solidity ^0.8.19;
+//2192725
 import "./Ownable.sol";
 
 contract GasContract is Ownable {
-    uint256 public totalSupply = 0; // cannot be updated -- immutable
+    uint256 public immutable totalSupply = 0; // cannot be updated -- immutable
     uint256 public paymentCounter = 0;
     mapping(address => uint256) public balances;
     uint256 public tradePercent = 12;
@@ -119,13 +119,8 @@ contract GasContract is Ownable {
         balance_ = balances[_user];
     }
 
-    function getTradingMode() public pure returns (bool mode_) {
-        mode_ = true; // check if we can switch to bool
-    }
-
     function addHistory(
-        address _updateAddress,
-        bool _tradeMode
+        address _updateAddress
     ) public returns (bool status_, bool tradeMode_) {
         History memory history;
         history.blockNumber = uint32(block.number);
@@ -136,7 +131,7 @@ contract GasContract is Ownable {
         for (uint256 i = 0; i < tradePercent; i++) {
             status[i] = true;
         }
-        return ((status[0] == true), _tradeMode);
+        return ((status[0] == true), true);
     }
 
     function getPayments(
@@ -209,8 +204,7 @@ contract GasContract is Ownable {
                 payments[_user][ii].admin = _user;
                 payments[_user][ii].paymentType = _type;
                 payments[_user][ii].amount = _amount;
-                bool tradingMode = getTradingMode();
-                addHistory(_user, tradingMode);
+                addHistory(_user);
                 emit PaymentUpdated(
                     senderOfTx,
                     _ID,
@@ -285,18 +279,13 @@ contract GasContract is Ownable {
 
     function getPaymentStatus(
         address sender
-    ) public view returns (bool, uint256) {
-        return (
-            whiteListStruct[sender].paymentStatus,
-            whiteListStruct[sender].amount
-        );
+    ) public view returns (bool status, uint256 amount) {
+        ImportantStruct storage wlstruct = whiteListStruct[sender];
+        status = wlstruct.paymentStatus;
+        amount = wlstruct.amount;
     }
 
     receive() external payable {
-        payable(msg.sender).transfer(msg.value);
-    }
-
-    fallback() external payable {
         payable(msg.sender).transfer(msg.value);
     }
 }
