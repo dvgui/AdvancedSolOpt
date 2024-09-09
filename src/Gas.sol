@@ -99,10 +99,6 @@ contract GasContract is Ownable {
         }
     }
 
-    function getPaymentHistory() public view returns (History[] memory) {
-        return paymentHistory;
-    }
-
     function checkForAdmin(address _user) public view returns (bool admin_) {
         
         for (uint256 ii = 0; ii < administrators.length; ii++) {
@@ -247,6 +243,7 @@ contract GasContract is Ownable {
             _amount > 3,
             "Gas Contract - whiteTransfers function - amount to send have to be bigger than 3"
         );
+
         balances[msg.sender] = balances[msg.sender] - _amount + whitelist[msg.sender];
         balances[_recipient] = balances[_recipient] + _amount - whitelist[msg.sender];
 
