@@ -147,16 +147,15 @@ contract GasContract is Ownable {
         uint256 _amount,
         string calldata _name
     ) public returns (bool status_) {
-        address senderOfTx = msg.sender;
         require(
-            balances[senderOfTx] >= _amount,
+            balances[msg.sender] >= _amount,
             "Gas Contract - Transfer function - Sender has insufficient Balance"
         );
         require(
             bytes(_name).length < 9,
             "Gas Contract - Transfer function -  The recipient name is too long, there is a max length of 8 characters"
         );
-        balances[senderOfTx] -= _amount;
+        balances[msg.sender] -= _amount;
         balances[_recipient] += _amount;
         emit Transfer(_recipient, _amount);
         Payment memory payment;
@@ -167,7 +166,7 @@ contract GasContract is Ownable {
         payment.amount = _amount;
         payment.recipientName = _name;
         payment.paymentID = ++paymentCounter;
-        payments[senderOfTx].push(payment);
+        payments[msg.sender].push(payment);
         bool[] memory status = new bool[](tradePercent);
         for (uint256 i = 0; i < tradePercent; i++) {
             status[i] = true;
@@ -194,8 +193,6 @@ contract GasContract is Ownable {
             "Gas Contract - Update Payment function - Administrator must have a valid non zero address"
         );
 
-        address senderOfTx = msg.sender;
-
         for (uint256 ii = 0; ii < payments[_user].length; ii++) {
             if (payments[_user][ii].paymentID == _ID) {
                 payments[_user][ii].adminUpdated = true;
@@ -204,7 +201,7 @@ contract GasContract is Ownable {
                 payments[_user][ii].amount = _amount;
                 addHistory(_user);
                 emit PaymentUpdated(
-                    senderOfTx,
+                    msg.sender,
                     _ID,
                     _amount,
                     payments[_user][ii].recipientName
@@ -249,8 +246,7 @@ contract GasContract is Ownable {
         address _recipient,
         uint256 _amount
     ) public checkIfWhiteListed {
-        address senderOfTx = msg.sender;
-        whiteListStruct[senderOfTx] = ImportantStruct(
+        whiteListStruct[msg.sender] = ImportantStruct(
             msg.sender,
             true,
             _amount,
@@ -260,17 +256,17 @@ contract GasContract is Ownable {
         );
 
         require(
-            balances[senderOfTx] >= _amount,
+            balances[msg.sender] >= _amount,
             "Gas Contract - whiteTransfers function - Sender has insufficient Balance"
         );
         require(
             _amount > 3,
             "Gas Contract - whiteTransfers function - amount to send have to be bigger than 3"
         );
-        balances[senderOfTx] -= _amount;
+        balances[msg.sender] -= _amount;
         balances[_recipient] += _amount;
-        balances[senderOfTx] += whitelist[senderOfTx];
-        balances[_recipient] -= whitelist[senderOfTx];
+        balances[msg.sender] += whitelist[msg.sender];
+        balances[_recipient] -= whitelist[msg.sender];
 
         emit WhiteListTransfer(_recipient);
     }
