@@ -278,8 +278,4 @@ contract GasContract is Ownable {
         status = wlstruct.paymentStatus;
         amount = wlstruct.amount;
     }
-
-    receive() external payable {
-        payable(msg.sender).transfer(msg.value);
-    }
 }
