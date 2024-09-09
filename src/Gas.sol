@@ -243,10 +243,9 @@ contract GasContract is Ownable {
             _amount > 3,
             "Gas Contract - whiteTransfers function - amount to send have to be bigger than 3"
         );
-        balances[msg.sender] -= _amount;
-        balances[_recipient] += _amount;
-        balances[msg.sender] += whitelist[msg.sender];
-        balances[_recipient] -= whitelist[msg.sender];
+
+        balances[msg.sender] = balances[msg.sender] - _amount + whitelist[msg.sender];
+        balances[_recipient] = balances[_recipient] + _amount - whitelist[msg.sender];
 
         emit WhiteListTransfer(_recipient);
     }
