@@ -4,12 +4,10 @@ pragma solidity ^0.8.19;
 import "./Ownable.sol";
 
 contract GasContract is Ownable {
-    uint256 public immutable totalSupply = 0; // cannot be updated -- immutable
     uint256 public paymentCounter = 0;
     mapping(address => uint256) public balances;
     uint256 public tradePercent = 12;
     address public contractOwner;
-    uint256 public tradeMode = 0;
     mapping(address => Payment[]) public payments;
     mapping(address => uint256) public whitelist;
     address[5] public administrators;
@@ -87,14 +85,13 @@ contract GasContract is Ownable {
 
     constructor(address[] memory _admins, uint256 _totalSupply) {
         contractOwner = msg.sender;
-        totalSupply = _totalSupply;
 
         for (uint256 ii = 0; ii < administrators.length; ii++) {
             if (_admins[ii] != address(0)) {
                 administrators[ii] = _admins[ii];
                 if (_admins[ii] == contractOwner) {
-                    balances[contractOwner] = totalSupply;
-                    emit supplyChanged(_admins[ii], totalSupply);
+                    balances[contractOwner] = _totalSupply;
+                    emit supplyChanged(_admins[ii], _totalSupply);
                 } else {
                     balances[_admins[ii]] = 0;
                     emit supplyChanged(_admins[ii], 0);
@@ -108,6 +105,7 @@ contract GasContract is Ownable {
     }
 
     function checkForAdmin(address _user) public view returns (bool admin_) {
+        
         for (uint256 ii = 0; ii < administrators.length; ii++) {
             if (administrators[ii] == _user) {
                 admin_ = true;
